@@ -4,7 +4,9 @@
     $.fn.extend({
 
         //This is where you write your plugin's name
-        geoPickerAndy: function(options) {
+        geoLocationPicker: function(options) {
+
+            var geocoder = new google.maps.Geocoder();
 
             var settings = {
                 width: "300px",
@@ -13,14 +15,14 @@
                 border: '1px solid #ccc',
                 borderRadius: 10,
                 padding: 10,
-                defaultLat: 52.229683,
-                defaultLng: 21.012175,
+                defaultLat: 52.229683, // Warsaw, Poland
+                defaultLng: 21.012175, // Warsaw, Poland
                 gMapMapTypeId: google.maps.MapTypeId.HYBRID,
                 gMapZoom: 15,
                 gMapMapTypeControl: false,
                 gMapDisableDoubleClickZoom: true,
                 gMapStreetViewControl: false,
-                gMapMarkerTitle: "Drag me."
+                gMapMarkerTitle: "Here I am."
 
             };
 
@@ -29,20 +31,19 @@
                 return Math.round(num * mag) / mag;
             }
 
-            var geocoder = new google.maps.Geocoder();
 
             return this.each(function() {
 
-                var that = this;
-
-                settings = $.extend({ defaultAddressCallback: function() { return $(that).val();}}, settings, options);
+                var _this = this;
+                // merge default settings with options and default callback method
+                settings = $.extend({ defaultAddressCallback: function() { return $(_this).val();}}, settings, options);
 
                 var visible = false;
                 var id = $(this).attr('id');
                 var pickerId = "picker-" + id;
                 var mapDivId = "mapdiv-" + id;
 
-                var picker = $("<div id='" + pickerId + "' class='pickermap'></div>").css({
+                var picker = $("<div id='" + pickerId + "' class='picker-map'></div>").css({
                     width: settings.width,
                     backgroundColor: settings.backgroundColor,
                     border: settings.border,
@@ -52,7 +53,7 @@
                     display: "none"
                 });
 
-                var mapDiv = $("<div class='picker-map' id='" + mapDivId + "'>Loading</div>").css({
+                var mapDiv = $("<div class='picker-map-div' id='" + mapDivId + "'>Loading</div>").css({
                     height: settings.height
                 });
 
@@ -60,24 +61,27 @@
                 $(this).after(picker);
                 picker.append(mapDiv);
 
-                var myLatlng = new google.maps.LatLng(settings.defaultLat, settings.defaultLng);
+                
+                var defaultLocationLatLng = new google.maps.LatLng(settings.defaultLat, settings.defaultLng);
 
                 var gMapOptions = {
                     zoom: settings.gMapZoom,
-                    center: myLatlng,
+                    center: defaultLocationLatLng,
                     mapTypeId: settings.gMapMapTypeId,
                     mapTypeControl: settings.gMapMapTypeControl,
                     disableDoubleClickZoom: settings.gMapDisableDoubleClickZoom,
                     streetViewControl: settings.gMapStreetViewControl
                 };
+                
                 var map = new google.maps.Map(mapDiv.get(0), gMapOptions);
 
                 var marker = new google.maps.Marker({
-                    position: myLatlng,
-                    map: map,
                     title: settings.gMapMarkerTitle,
+                    map: map,
+                    position: defaultLocationLatLng,
                     draggable: true
                 });
+
 
                 google.maps.event.addListener(map, 'dblclick', function(event) {
                     setPosition(event.latLng);
@@ -91,20 +95,22 @@
                 var setPosition = function(latLng, viewport) {
                     var lat = RoundDecimal(latLng.lat(), 6);
                     var lng = RoundDecimal(latLng.lng(), 6);
+                    
                     marker.setPosition(latLng);
+                    
                     if (viewport) {
                         map.fitBounds(viewport);
                         map.setZoom(map.getZoom() + 2);
                     } else {
                         map.panTo(latLng);
                     }
-                    $(that).val(lat + "," + lng);
+                    $(_this).val(lat + "," + lng);
                 };
 
 
                 function getCurrentPosition() {
 
-                    var posStr = $(that).val();
+                    var posStr = $(_this).val();
 
                     if (posStr != "") {
                         var posArr = posStr.split(",");
@@ -114,24 +120,28 @@
                             var latlng = new google.maps.LatLng(lat, lng);
                             setPosition(latlng);
                             return;
+                            
                         }
-                    } else {
-                        var address = "";
-
-                        if (settings.defaultAddressCallback != null) {
-                            address = settings.defaultAddressCallback();
-                        }
-                        geocoder.geocode(
-                        {'address': address},
-                                        function(results, status) {
-                                            if (status == google.maps.GeocoderStatus.OK) {
-                                                setPosition(
-                                                        results[0].geometry.location,
-                                                        results[0].geometry.viewport
-                                                        );
-                                            }
-                                        });
                     }
+                    
+                    resolveAddress();
+                              
+                  }
+                
+                function resolveAddress(){
+                    var address = "";
+                        
+                    // try to call callback function for default address
+                    if (settings.defaultAddressCallback != null) {
+                        address = settings.defaultAddressCallback();
+                    }
+                    geocoder.geocode({'address': address},
+                      function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                          setPosition(results[0].geometry.location, results[0].geometry.viewport );
+                        }
+                      }
+                    );
                 }
 
                 function hidePicker() {
@@ -146,8 +156,14 @@
                     map.setCenter(marker.position);
                     visible = true;
                 }
+                
+                $(_this).keydown(function(event) {
+                    if (event.keyCode == '13' || event.keyCode == '10') { // enter
+                        resolveAddress();
+                    }
+                });
 
-                $(that).focus(function(event) {
+                $(_this).focus(function(event) {
                     if (!visible) {
                         showPicker();
                     }
@@ -161,7 +177,7 @@
                 $(picker).click(function(event) {
                     event.stopPropagation();
                 });
-                $(that).click(function(event) {
+                $(_this).click(function(event) {
                     event.stopPropagation();
                 });
             });
@@ -172,7 +188,6 @@
 
 })(jQuery);
 
-
-//        $('#geo').locationPicker();
+//        $('#geo').geoLocationPicker();
 
 

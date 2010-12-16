@@ -1,0 +1,26 @@
+# jquery-geolocation-picker
+
+# usage
+
+<script type="text/javascript" src='http://maps.google.com/maps/api/js?sensor=false'></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'></script>
+<script type='text/javascript' src='jquery.geolocationpicker.js'></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('input#geo').geoLocationPicker();
+    });
+</script>
+
+see index.html source for more .... 
+
+
+
+# disclaimer
+
+This jQuery plugin is totally inspired by http://code.google.com/p/locationpicker/ (chris@webcoda.co.uk). 
+Unfortuanatelly the changes I've made breaks the original plugin assumptions - like Search button i.e. 
+So I've decided to release it in separete repository - but still be sure that most of work is just ported from Chris work.
+
+
+
+
