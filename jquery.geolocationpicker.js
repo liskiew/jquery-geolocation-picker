@@ -22,8 +22,8 @@
                 gMapMapTypeControl: false,
                 gMapDisableDoubleClickZoom: true,
                 gMapStreetViewControl: false,
-                gMapMarkerTitle: "Here I am."
-
+                gMapMarkerTitle: "Here I am.",
+                showPickerEvent: "focus"
             };
 
             function RoundDecimal(num, decimals) {
@@ -36,7 +36,10 @@
 
                 var _this = this;
                 // merge default settings with options and default callback method
-                settings = $.extend({ defaultAddressCallback: function() { return $(_this).val();}}, settings, options);
+                settings = $.extend({
+                    defaultAddressCallback: function() { return $(_this).val();},
+                    defaultLocationCallback: function(lat, lng) {$(_this).val(lat + "," + lng);}
+                }, settings, options);
 
                 var visible = false;
                 var id = $(this).attr('id');
@@ -63,6 +66,7 @@
 
                 
                 var defaultLocationLatLng = new google.maps.LatLng(settings.defaultLat, settings.defaultLng);
+//                    $(_this).val(lat + "," + lng);<
 
                 var gMapOptions = {
                     zoom: settings.gMapZoom,
@@ -104,7 +108,8 @@
                     } else {
                         map.panTo(latLng);
                     }
-                    $(_this).val(lat + "," + lng);
+
+                    settings.defaultLocationCallback(lat, lng);
                 };
 
 
@@ -163,7 +168,7 @@
                     }
                 });
 
-                $(_this).focus(function(event) {
+                $(_this).bind(settings.showPickerEvent, function(event) {
                     if (!visible) {
                         showPicker();
                     }
