@@ -23,7 +23,9 @@
                 gMapDisableDoubleClickZoom: true,
                 gMapStreetViewControl: false,
                 gMapMarkerTitle: "Here I am.",
-                showPickerEvent: "focus"
+                showPickerEvent: "focus",
+                left: options.left,
+                top: options.top
             };
 
             function RoundDecimal(num, decimals) {
@@ -53,7 +55,9 @@
                     padding: settings.padding,
                     borderRadius: settings.borderRadius,
                     position: "absolute",
-                    display: "none"
+                    display: "none",
+                    left: settings.left,
+                    top: settings.top
                 });
 
                 var mapDiv = $("<div class='picker-map-div' id='" + mapDivId + "'>Loading</div>").css({

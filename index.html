@@ -17,10 +17,14 @@
             }
             
             $('input#withcallback').geoLocationPicker({
-              defaultAddressCallback: getAddress
+              defaultAddressCallback: getAddress,
+              left: "300px"
             });
             
-            $('input#withoutcallback').geoLocationPicker();
+            $('input#withoutcallback').geoLocationPicker({
+              left: "400px",
+              top: "200px"
+            });
             
           });
 </script>
@@ -45,7 +49,5 @@
         <label for="withoutcallback">Address/Geo Location:</label>
         <input id='withoutcallback' type="text" name="geo"/>
     </p>
-    
-
 </body>
 </html>
